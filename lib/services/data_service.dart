@@ -31,7 +31,18 @@ class DataService {
     return await _save(data);
   }
 
-  List<AlarmModel> get() {
+  AlarmModel? getSpecificAlarm(String id) {
+    final alarms = getAllAlarms();
+
+    try {
+      final validAlarm = alarms.firstWhere((alarm) => alarm.id == id);
+      return validAlarm;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  List<AlarmModel> getAllAlarms() {
     final data = _getString(_alarmKey);
     final models = <AlarmModel>[];
     for (final key in data.keys) {
@@ -39,6 +50,34 @@ class DataService {
         models.add(AlarmModel.fromJson(data[key]));
       }
     }
+    models.sort(
+      (a, b) => a.createdAt.compareTo(b.createdAt),
+    );
     return models;
+  }
+
+  AlarmModel? get upcomingAlarm {
+    final alarms = getAllAlarms();
+    if (alarms.isEmpty) {
+      return null;
+    }
+    return alarms.first;
+  }
+
+  List<AlarmModel> getCurrentDayAlarms() {
+    final rawAlarms = getAllAlarms();
+    final currentTime = DateTime.now();
+    final currentDayAlarms = <AlarmModel>[];
+
+    for (final rawAlarm in rawAlarms) {
+      final alarmTime = rawAlarm.createdAt;
+      if (alarmTime.year == currentTime.year &&
+          alarmTime.month == currentTime.month &&
+          alarmTime.day == currentTime.day) {
+        currentDayAlarms.add(rawAlarm);
+      }
+    }
+
+    return currentDayAlarms;
   }
 }

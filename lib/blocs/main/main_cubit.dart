@@ -34,4 +34,14 @@ class MainCubit extends Cubit<MainState> {
   void navigateTo(int screenIndex) {
     return emit(state.copyWith(screenIndex: screenIndex));
   }
+
+  List<AlarmModel> getAlarms() {
+    return _dataService.getAllAlarms();
+  }
+
+  List<AlarmModel> getCurrentDayAlarms() {
+    return _dataService.getCurrentDayAlarms();
+  }
+
+  AlarmModel? get upcomingAlarm => _dataService.upcomingAlarm;
 }

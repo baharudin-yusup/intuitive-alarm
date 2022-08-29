@@ -87,11 +87,7 @@ class SetAlarmCubit extends Cubit<SetAlarmState> {
     final degree = _mathUtil.offsetToClockDegree(offset);
     final hour = _mathUtil.degreeToClockHour(degree);
 
-    if (state.isPM == false) {
-      return emit(state.copyWith(hour: hour + 12));
-    } else {
-      return emit(state.copyWith(hour: hour));
-    }
+    return emit(state.copyWith(hour: hour));
   }
 
   void setMinute(Offset rawOffset) {
@@ -123,6 +119,8 @@ class SetAlarmCubit extends Cubit<SetAlarmState> {
     } else {
       alarmTime = state.rawTime;
     }
+
+    debugPrint('AT: ${alarmTime.toString()} RT: ${alarmTime.toString()}');
 
     final model = AlarmModel.fromBloc(time: alarmTime);
     return await _mainCubit.createAlarm(model);

@@ -13,7 +13,8 @@ class MainScreen extends StatelessWidget {
   final int initialScreen;
   final String? initialAlarmId;
 
-  const MainScreen({Key? key, this.initialScreen = 0, this.initialAlarmId}) : super(key: key);
+  const MainScreen({Key? key, this.initialScreen = 0, this.initialAlarmId})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {

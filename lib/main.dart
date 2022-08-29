@@ -25,6 +25,7 @@ Future<void> main() async {
   );
   final alarmService = AlarmService(
     navigatorService: navigatorService,
+    dataService: dataService,
     localNotificationsPlugin: FlutterLocalNotificationsPlugin(),
     deviceInfo: DeviceInfoPlugin(),
   );

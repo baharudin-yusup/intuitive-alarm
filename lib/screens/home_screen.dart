@@ -1,7 +1,11 @@
 import 'package:baharudin_alarm/blocs/home/home_cubit.dart';
+import 'package:baharudin_alarm/models/alarm_model.dart';
 import 'package:baharudin_alarm/widgets/analog_clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../blocs/main/main_cubit.dart';
+import '../widgets/text_clock.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -11,56 +15,82 @@ class HomeScreen extends StatelessWidget {
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
     final clockDiagonal = width * 0.8;
-    return SizedBox(
-      width: width,
-      height: height,
-      child: BlocProvider<HomeCubit>(
-        create: (context) => HomeCubit(),
-        child: BlocBuilder<HomeCubit, DateTime>(
-          builder: (context, state) {
-            return SingleChildScrollView(
-              child: SafeArea(
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(bottom: height * 0.05),
-                      child: _TextClock(time: state),
-                    ),
-                    AnalogClock(
-                      diagonal: clockDiagonal,
-                      time: state,
-                    ),
-                  ],
+
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(
+        vertical: height * 0.05,
+        horizontal: width * 0.05,
+      ),
+      child: SafeArea(
+        child: BlocProvider<HomeCubit>(
+          create: (_) => HomeCubit(mainCubit: context.read<MainCubit>()),
+          child: BlocBuilder<HomeCubit, HomeState>(
+            builder: (context, state) {
+              return SingleChildScrollView(
+                child: SafeArea(
+                  child: Column(
+                    children: [
+                      Center(
+                        child: AnalogClock(
+                          diagonal: clockDiagonal,
+                          time: state.currentTime,
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(top: height * 0.05),
+                        child: Column(
+                          children: [
+                            Text(
+                              'Current Time',
+                              style: textTheme.displaySmall,
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(
+                                top: width * 0.05,
+                              ),
+                              child: TextClock(time: state.currentTime),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(top: height * 0.05),
+                        child: Column(
+                          children: [
+                            Text(
+                              'Upcoming Alarm',
+                              style: textTheme.displaySmall,
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(
+                                top: width * 0.05,
+                              ),
+                              child: _showUpcomingAlarm(state.upcomingAlarm, context),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );
   }
-}
 
-class _TextClock extends StatelessWidget {
-  final DateTime time;
-
-  const _TextClock({Key? key, required this.time}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final style = theme.textTheme.bodyLarge?.copyWith(fontSize: 30);
-    return Column(
-      children: [
-        show(style),
-      ],
-    );
-  }
-
-  Widget show(TextStyle? style) {
-    final hour = time.hour.toString().padLeft(2, '0');
-    final minute = time.minute.toString().padLeft(2, '0');
-    final second = time.second.toString().padLeft(2, '0');
-    return Text('$hour:$minute:$second', style: style);
+  Widget _showUpcomingAlarm(AlarmModel? upcomingAlarm, BuildContext context) {
+    final textStyle = Theme.of(context).textTheme.titleLarge;
+    if (upcomingAlarm == null) {
+      return Text(
+        'No upcoming alarm :)',
+        style: textStyle,
+      );
+    }
+    return TextClock(time: upcomingAlarm.createdAt, showFullTitle: true,);
   }
 }
