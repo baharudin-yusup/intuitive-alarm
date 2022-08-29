@@ -18,6 +18,7 @@ class HomeScreen extends StatelessWidget {
 
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
+    final mainCubit = context.read<MainCubit>();
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(
         vertical: height * 0.05,
@@ -25,7 +26,8 @@ class HomeScreen extends StatelessWidget {
       ),
       child: SafeArea(
         child: BlocProvider<HomeCubit>(
-          create: (_) => HomeCubit(mainCubit: context.read<MainCubit>()),
+          create: (context) =>
+              HomeCubit(dataService: mainCubit.dataService),
           child: BlocBuilder<HomeCubit, HomeState>(
             builder: (context, state) {
               return SingleChildScrollView(
@@ -67,7 +69,8 @@ class HomeScreen extends StatelessWidget {
                               padding: EdgeInsets.only(
                                 top: width * 0.05,
                               ),
-                              child: _showUpcomingAlarm(state.upcomingAlarm, context),
+                              child: _showUpcomingAlarm(
+                                  state.upcomingAlarm, context),
                             ),
                           ],
                         ),
@@ -91,6 +94,9 @@ class HomeScreen extends StatelessWidget {
         style: textStyle,
       );
     }
-    return TextClock(time: upcomingAlarm.createdAt, showFullTitle: true,);
+    return TextClock(
+      time: upcomingAlarm.createdAt,
+      showFullTitle: true,
+    );
   }
 }

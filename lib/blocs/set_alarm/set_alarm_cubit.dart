@@ -23,10 +23,13 @@ class SetAlarmCubit extends Cubit<SetAlarmState> {
         _mathUtil = mathUtil,
         super(SetAlarmState.initial(initialTime));
 
-  void setHandStatus(PointerDownEvent event) {
+  void onPointerDown(PointerDownEvent event) {
+    if (state.status != SetAlarmStatus.initial) {
+      return;
+    }
+
     final offset = _convertedOffset(event.localPosition);
     final touchDegree = _mathUtil.offsetToClockDegree(offset);
-    debugPrint('c: $touchDegree');
 
     final clockHourDegree = _mathUtil.clockHourToDegree(state.hour);
     final clockHourDistance =
@@ -39,9 +42,6 @@ class SetAlarmCubit extends Cubit<SetAlarmState> {
     final clockSecondDegree = _mathUtil.clockSecondToDegree(state.second);
     final clockSecondDistance =
         _mathUtil.clockDistance(clockSecondDegree, touchDegree);
-
-    debugPrint(
-        'h: $clockHourDistance | m: $clockMinuteDistance | s: $clockSecondDistance');
 
     if (clockHourDistance <= clockMinuteDistance &&
         clockHourDistance <= clockSecondDistance) {
@@ -56,15 +56,14 @@ class SetAlarmCubit extends Cubit<SetAlarmState> {
     return emit(state.copyWith(status: SetAlarmStatus.setSecond));
   }
 
-  void onTouchUp(PointerUpEvent event) {
+  void onPointerUp(PointerUpEvent event) {
     return emit(state.copyWith(status: SetAlarmStatus.initial));
   }
 
-  void setTime(PointerMoveEvent event) {
+  void onPointerMove(PointerMoveEvent event) {
     final rawOffset = event.localPosition;
     switch (state.status) {
       case SetAlarmStatus.initial:
-        // TODO: Handle this case.
         break;
       case SetAlarmStatus.setHour:
         return setHour(rawOffset);
@@ -73,10 +72,8 @@ class SetAlarmCubit extends Cubit<SetAlarmState> {
       case SetAlarmStatus.setSecond:
         return setSecond(rawOffset);
       case SetAlarmStatus.setAM:
-        // TODO: Handle this case.
         break;
       case SetAlarmStatus.success:
-        // TODO: Handle this case.
         break;
     }
   }
@@ -119,8 +116,6 @@ class SetAlarmCubit extends Cubit<SetAlarmState> {
     } else {
       alarmTime = state.rawTime;
     }
-
-    debugPrint('AT: ${alarmTime.toString()} RT: ${alarmTime.toString()}');
 
     final model = AlarmModel.fromBloc(time: alarmTime);
     return await _mainCubit.createAlarm(model);

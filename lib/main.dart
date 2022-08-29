@@ -20,9 +20,12 @@ Future<void> main() async {
   final navigatorService = NavigatorService(
     globalKey: GlobalKey<NavigatorState>(),
   );
+
   final dataService = DataService(
     sharedPreferences: await SharedPreferences.getInstance(),
   );
+  dataService.init();
+
   final alarmService = AlarmService(
     navigatorService: navigatorService,
     dataService: dataService,
@@ -31,6 +34,7 @@ Future<void> main() async {
   );
   await alarmService.init();
   await alarmService.requestPermission();
+
   runApp(
     BaharudinAlarm(
       alarmService: alarmService,

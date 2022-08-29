@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../models/alarm_model.dart';
@@ -18,7 +19,15 @@ class MainCubit extends Cubit<MainState> {
     required DataService dataService,
   })  : _alarmService = alarmService,
         _dataService = dataService,
-        super(MainState.initial());
+        super(MainState.initial()) {
+    _dataService.upcomingAlarm.last.then((alarm) {
+      emit(state.copyWith(upcomingAlarm: alarm));
+    });
+
+    _dataService.upcomingAlarm.listen((alarm) {
+      emit(state.copyWith(upcomingAlarm: alarm));
+    });
+  }
 
   Future<bool?> requestPermission() async {
     return _alarmService.requestPermission();
@@ -27,7 +36,7 @@ class MainCubit extends Cubit<MainState> {
   Future<void> createAlarm(AlarmModel model) async {
     final successSaveData = await _dataService.add(model);
     if (successSaveData) {
-      await _alarmService.createAlarm(model);
+      return await _alarmService.createAlarm(model);
     }
   }
 
@@ -43,5 +52,5 @@ class MainCubit extends Cubit<MainState> {
     return _dataService.getCurrentDayAlarms();
   }
 
-  AlarmModel? get upcomingAlarm => _dataService.upcomingAlarm;
+  DataService get dataService => _dataService;
 }

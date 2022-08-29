@@ -38,9 +38,9 @@ class SetAlarmScreen extends StatelessWidget {
                     width: clockDiagonal,
                     height: clockDiagonal,
                     child: Listener(
-                      onPointerDown: setAlarmCubit.setHandStatus,
-                      onPointerMove: setAlarmCubit.setTime,
-                      onPointerUp: setAlarmCubit.onTouchUp,
+                      onPointerDown: setAlarmCubit.onPointerDown,
+                      onPointerMove: setAlarmCubit.onPointerMove,
+                      onPointerUp: setAlarmCubit.onPointerUp,
                       child: AnalogClock(
                         diagonal: clockDiagonal,
                         time: state.rawTime,

@@ -1,16 +1,29 @@
-# baharudin_alarm
+# Baharudin Alarm
+An alarm app made with Flutter for Stockbit and Bibit test assignment.
+My LinkedIn url: [https://linkedin.com/in/baharudin-yusup](https://linkedin.com/in/baharudin-yusup)
 
-An alarm app made with Flutter for Stockbit and Bibit test assignment
+## Specifications
+- Flutter stable (3.x.x)
+- Android SDK 21-33 (Lollipop - Android 13)
+- iOS 9 - 15
 
-## Getting Started
+## Features
+- Support Material Design 3 (Material You) like dynamic color theme, etc
+- User can see waiting time statistics when notification is touched
+- Users can get notifications even when the app is closed
+- User can set alarm by moving the clock hands
+- User can see next upcoming alarm
+- User can see today's alarms
+- User can see all alarms
+- Add multiple alarm
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Third Party Packages
+- **flutter_bloc & equatable:** Untuk mengimplementasikan Bloc state management
+- **flutter_local_notifications & permission_handler:** Untuk mengimplementasikan notifikasi
+- **dynamic_color & device_info_plus:** Untuk mengimplementasikan dynamic color theme pada android 12 keatas
+- **timezone:** Untuk mendapatkan waktu lokal (opsional)
+- **shared_preferences:** Untuk menyimpan data alarm di lokal
+- **uuid:** Untuk menghasilkan unique id sesuai standar
+- **intl:** Untuk melakukan formatting tanggal
+- **syncfusion_flutter_charts:** Untuk menampilkan Bar Chart
+- **rxdart:** Untuk mempermudah kebutuhan streaming

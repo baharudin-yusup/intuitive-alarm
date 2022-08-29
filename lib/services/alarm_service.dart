@@ -5,6 +5,7 @@ import 'package:baharudin_alarm/screens/main_screen.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz;
 
@@ -13,7 +14,6 @@ import 'navigator_service.dart';
 
 class AlarmService {
   final FlutterLocalNotificationsPlugin _localNotificationsPlugin;
-  final DeviceInfoPlugin _deviceInfo;
   final NavigatorService _navigatorService;
   final DataService _dataService;
 
@@ -22,8 +22,7 @@ class AlarmService {
     required FlutterLocalNotificationsPlugin localNotificationsPlugin,
     required DeviceInfoPlugin deviceInfo,
     required DataService dataService,
-  })  : _deviceInfo = deviceInfo,
-        _localNotificationsPlugin = localNotificationsPlugin,
+  })  : _localNotificationsPlugin = localNotificationsPlugin,
         _navigatorService = navigatorService,
         _dataService = dataService;
 
@@ -44,7 +43,14 @@ class AlarmService {
       requestSoundPermission: true,
       onDidReceiveLocalNotification:
           (int id, String? title, String? body, String? payload) async {
-        debugPrint('id: $id | title: $title | body: $body | payload: $payload');
+        if (payload != null) {
+          final alarm = _dataService.getSpecificAlarm(payload);
+
+          if (alarm != null) {
+            await _dataService.add(alarm.copyWith(openedAt: DateTime.now()));
+          }
+          _navigatorService.pushNamed(MainScreen.notificationRoute);
+        }
       },
     );
     var initializationSettings = InitializationSettings(
@@ -63,12 +69,8 @@ class AlarmService {
   }
 
   Future<bool?> requestPermission() async {
-    if (!Platform.isAndroid) {
-      return null;
-    }
-    final androidSdk = (await _deviceInfo.androidInfo).version.sdkInt ?? 0;
-    if (androidSdk < 33) {
-      return null;
+    if (Platform.isAndroid) {
+      await Permission.ignoreBatteryOptimizations.status;
     }
 
     return await _localNotificationsPlugin
@@ -78,7 +80,6 @@ class AlarmService {
   }
 
   Future<void> createAlarm(AlarmModel model) async {
-    debugPrint('set alarm! at ${model.createdAt}');
     var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
       'baharudin_alarm',
       'baharudin_alarm',
@@ -91,7 +92,7 @@ class AlarmService {
       presentBadge: true,
       presentSound: true,
     );
-    var platformChannelSpecifics = NotificationDetails(
+    var notificationDetails = NotificationDetails(
       android: androidPlatformChannelSpecifics,
       iOS: iOSPlatformChannelSpecifics,
     );
@@ -101,13 +102,11 @@ class AlarmService {
       'Baharudin Alarm',
       'Alarm is coming! (${model.title})',
       tz.TZDateTime.from(model.createdAt, tz.local),
-      platformChannelSpecifics,
+      notificationDetails,
       androidAllowWhileIdle: true,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
       payload: model.id,
     );
   }
-
-
 }

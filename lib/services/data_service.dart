@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:baharudin_alarm/models/alarm_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -9,6 +12,16 @@ class DataService {
 
   DataService({required SharedPreferences sharedPreferences})
       : _prefs = sharedPreferences;
+
+  void init() {
+    final upcomingAlarm = _checkUpcomingAlarm;
+    if (upcomingAlarm != null) {
+      debugPrint('init upcoming alarm: ${upcomingAlarm.createdAt}');
+      _upcomingAlarmController.sink.add(upcomingAlarm);
+    } else {
+      debugPrint('no upcoming alarm');
+    }
+  }
 
   Map<String, dynamic> _getString(String key) {
     final String raw = _prefs.getString(_alarmKey) ?? '{}';
@@ -28,7 +41,13 @@ class DataService {
   Future<bool> add(AlarmModel model) async {
     final data = _getString(_alarmKey);
     data[model.id] = model.toJson();
-    return await _save(data);
+    await _save(data);
+    final upcomingAlarm = _checkUpcomingAlarm;
+    if (upcomingAlarm != null) {
+      _upcomingAlarmController.sink.add(upcomingAlarm);
+    }
+
+    return true;
   }
 
   AlarmModel? getSpecificAlarm(String id) {
@@ -56,12 +75,18 @@ class DataService {
     return models;
   }
 
-  AlarmModel? get upcomingAlarm {
+  AlarmModel? get _checkUpcomingAlarm {
     final alarms = getAllAlarms();
     if (alarms.isEmpty) {
       return null;
     }
-    return alarms.first;
+    final currentTime = DateTime.now();
+    for (final alarm in alarms) {
+      if (alarm.createdAt.isAfter(currentTime)) {
+        return alarm;
+      }
+    }
+    return null;
   }
 
   List<AlarmModel> getCurrentDayAlarms() {
@@ -79,5 +104,11 @@ class DataService {
     }
 
     return currentDayAlarms;
+  }
+
+  final _upcomingAlarmController = BehaviorSubject<AlarmModel>();
+
+  Stream<AlarmModel> get upcomingAlarm {
+    return _upcomingAlarmController.stream;
   }
 }

@@ -4,7 +4,10 @@ class HomeState extends Equatable {
   final DateTime currentTime;
   final AlarmModel? upcomingAlarm;
 
-  const HomeState({required this.currentTime, this.upcomingAlarm});
+  const HomeState({
+    required this.currentTime,
+    this.upcomingAlarm,
+  });
 
   factory HomeState.initial() {
     return HomeState(

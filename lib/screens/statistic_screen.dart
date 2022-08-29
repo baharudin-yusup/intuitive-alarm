@@ -69,6 +69,7 @@ class StatisticScreen extends StatelessWidget {
       primaryYAxis: NumericAxis(
         title: AxisTitle(text: 'Waiting Time'),
         autoScrollingMode: AutoScrollingMode.start,
+        interval: 10,
       ),
       primaryXAxis: CategoryAxis(
         title: AxisTitle(text: 'Date'),
