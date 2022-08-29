@@ -4,7 +4,7 @@ My LinkedIn url: [https://linkedin.com/in/baharudin-yusup](https://linkedin.com/
 
 ## Specifications
 - Flutter stable (3.x.x)
-- Android SDK 21-33 (Lollipop - Android 13)
+- Android SDK 21 - 33 (Lollipop - Android 13)
 - iOS 9 - 15
 
 ## Features
