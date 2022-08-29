@@ -1,30 +1,30 @@
 import 'dart:io';
 
 import 'package:baharudin_alarm/models/alarm_model.dart';
-import 'package:baharudin_alarm/screens/main_screen.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz;
 
 import 'data_service.dart';
-import 'navigator_service.dart';
 
 class AlarmService {
   final FlutterLocalNotificationsPlugin _localNotificationsPlugin;
-  final NavigatorService _navigatorService;
+  final BehaviorSubject<String> _payloadStreamController;
   final DataService _dataService;
 
+  Stream<String> get notifications => _payloadStreamController.stream;
+
   AlarmService({
-    required NavigatorService navigatorService,
     required FlutterLocalNotificationsPlugin localNotificationsPlugin,
     required DeviceInfoPlugin deviceInfo,
     required DataService dataService,
   })  : _localNotificationsPlugin = localNotificationsPlugin,
-        _navigatorService = navigatorService,
-        _dataService = dataService;
+        _dataService = dataService,
+        _payloadStreamController = BehaviorSubject<String>();
 
   Future<void> _configureLocalTimeZone() async {
     if (kIsWeb || Platform.isLinux) {
@@ -35,6 +35,9 @@ class AlarmService {
 
   Future<void> init() async {
     await _configureLocalTimeZone();
+    final notificationAppLaunchDetails =
+        await _localNotificationsPlugin.getNotificationAppLaunchDetails();
+
     var initializationSettingsAndroid =
         const AndroidInitializationSettings('app_icon');
     var initializationSettingsIOS = IOSInitializationSettings(
@@ -43,29 +46,47 @@ class AlarmService {
       requestSoundPermission: true,
       onDidReceiveLocalNotification:
           (int id, String? title, String? body, String? payload) async {
+        await _handlePayload(payload);
         if (payload != null) {
-          final alarm = _dataService.getSpecificAlarm(payload);
-
-          if (alarm != null) {
-            await _dataService.add(alarm.copyWith(openedAt: DateTime.now()));
-          }
-          _navigatorService.pushNamed(MainScreen.notificationRoute);
+          _payloadStreamController.sink.add(payload);
         }
       },
     );
     var initializationSettings = InitializationSettings(
         android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
-    await _localNotificationsPlugin.initialize(initializationSettings,
-        onSelectNotification: (String? id) async {
-      if (id != null) {
-        final alarm = _dataService.getSpecificAlarm(id);
 
-        if (alarm != null) {
-          await _dataService.add(alarm.copyWith(openedAt: DateTime.now()));
+    await _localNotificationsPlugin.initialize(
+      initializationSettings,
+      onSelectNotification: (payload) async {
+        debugPrint('onSelectNotification: $payload');
+        await _handlePayload(payload);
+        if (payload != null) {
+          _payloadStreamController.sink.add(payload);
         }
-        _navigatorService.pushNamed(MainScreen.notificationRoute);
+      },
+    );
+
+    if (notificationAppLaunchDetails?.didNotificationLaunchApp ?? false) {
+      final payload = notificationAppLaunchDetails!.payload;
+      await _handlePayload(payload);
+      if (payload != null) {
+        _payloadStreamController.sink.add(payload);
       }
-    });
+    }
+  }
+
+  Future<void> _handlePayload(String? payload) async {
+    debugPrint('handle payload: $payload');
+    if (payload != null) {
+      final alarm = _dataService.getSpecificAlarm(payload);
+      if (alarm != null) {
+        await _dataService.add(
+          alarm.copyWith(
+            openedAt: DateTime.now(),
+          ),
+        );
+      }
+    }
   }
 
   Future<bool?> requestPermission() async {
@@ -84,7 +105,6 @@ class AlarmService {
       'baharudin_alarm',
       'baharudin_alarm',
       channelDescription: 'Baharudin Alarm',
-      icon: 'app_icon',
     );
 
     var iOSPlatformChannelSpecifics = const IOSNotificationDetails(

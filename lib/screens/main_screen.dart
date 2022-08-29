@@ -7,20 +7,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'set_alarm_screen.dart';
 
 class MainScreen extends StatelessWidget {
-  static const route = '/main';
-  static const notificationRoute = '/notification';
-
-  final int initialScreen;
-  final String? initialAlarmId;
-
-  const MainScreen({Key? key, this.initialScreen = 0, this.initialAlarmId})
-      : super(key: key);
+  const MainScreen({
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final mainCubit = context.read<MainCubit>();
-    mainCubit.navigateTo(initialScreen);
     return BlocBuilder<MainCubit, MainState>(
       builder: (context, state) {
         return Scaffold(
@@ -62,4 +56,3 @@ class MainScreen extends StatelessWidget {
     }
   }
 }
-

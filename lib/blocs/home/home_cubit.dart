@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'package:baharudin_alarm/blocs/main/main_cubit.dart';
 import 'package:baharudin_alarm/models/alarm_model.dart';
 import 'package:baharudin_alarm/services/data_service.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'home_state.dart';

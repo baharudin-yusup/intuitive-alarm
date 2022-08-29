@@ -1,11 +1,9 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../models/alarm_model.dart';
 import '../../services/alarm_service.dart';
 import '../../services/data_service.dart';
-import '../../services/navigator_service.dart';
 
 part 'main_state.dart';
 
@@ -15,11 +13,14 @@ class MainCubit extends Cubit<MainState> {
 
   MainCubit({
     required AlarmService alarmService,
-    required NavigatorService navigatorService,
     required DataService dataService,
   })  : _alarmService = alarmService,
         _dataService = dataService,
         super(MainState.initial()) {
+    _alarmService.notifications.listen((_) {
+      emit(state.copyWith(screenIndex: 2));
+    });
+
     _dataService.upcomingAlarm.last.then((alarm) {
       emit(state.copyWith(upcomingAlarm: alarm));
     });
